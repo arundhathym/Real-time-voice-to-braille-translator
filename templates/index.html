@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice to Braille Translator</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  /* Body & global */
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f0f4f8, #ffffff);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    color: #2c3e50;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(90deg, #4a6fa5, #1e3a5f);
+    color: #fff;
+    padding: 25px 0;
+    text-align: center;
+    font-family: 'Merriweather', serif;
+    letter-spacing: 0.7px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 1.9em;
+  }
+
+  /* Container */
+  .container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    margin: 50px auto;
+    padding: 40px 30px;
+    max-width: 720px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    animation: fadeIn 0.8s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h2 {
+    text-align: center;
+    font-family: 'Merriweather', serif;
+    color: #1e3a5f;
+    font-size: 1.5em;
+    margin-bottom: 25px;
+  }
+
+  label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+    color: #34495e;
+  }
+
+  select, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border-radius: 10px;
+    border: 1px solid #bdc3c7;
+    background-color: #f9fafb;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+  }
+
+  select:focus, textarea:focus {
+    border-color: #1e3a5f;
+    outline: none;
+    box-shadow: 0 0 8px rgba(30,58,95,0.2);
+  }
+
+  .input-group small {
+    display: block;
+    margin-bottom: 18px;
+    color: #7f8c8d;
+    font-size: 0.85em;
+    font-style: italic;
+  }
+
+  /* Buttons */
+  .buttons {
+    text-align: center;
+  }
+
+  button {
+    background: linear-gradient(90deg, #1e3a5f, #4a6fa5);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-size: 15px;
+    cursor: pointer;
+    margin: 8px 6px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(30, 58, 95, 0.3);
+  }
+
+  button:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(30, 58, 95, 0.5);
+  }
+
+  button:disabled {
+    background: #b0b8c2;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* Recording indicator */
+  .recording {
+    text-align: center;
+    color: #e74c3c;
+    font-weight: 600;
+    margin-top: 12px;
+    font-style: italic;
+    display: none;
+  }
+
+  .recording::before {
+    content: "🎤";
+    margin-right: 6px;
+    display: inline-block;
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Output sections */
+  #output {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #dcdcdc;
+  }
+
+  h3 {
+    color: #1e3a5f;
+    font-family: 'Merriweather', serif;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  p {
+    background-color: #f4f6f8;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 16px;
+    line-height: 1.6;
+    border: 1px solid #e0e0e0;
+    min-height: 40px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  #text.error {
+    background-color: #fcebeb;
+    border-color: #e74c3c;
+    color: #e74c3c;
+  }
+
+  .braille {
+    font-size: 28px;
+    letter-spacing: 6px;
+    font-family: "SimBraille", "Arial Unicode MS", "Noto Sans", sans-serif;
+    word-wrap: break-word;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    color: #7f8c8d;
+    font-size: 14px;
+    margin-top: auto;
+    padding: 20px 0;
+  }
+
+  footer span {
+    color: #1e3a5f;
+    font-weight: 600;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .container {
+      margin: 20px;
+      padding: 25px 20px;
+    }
+    header h1 {
+      font-size: 1.5em;
+    }
+    button {
+      padding: 10px 18px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎙 Real-Time Malayalam & English Voice to Braille</h1>
+</header>
+
+<div class="container">
+  <h2>Voice Input → Braille Output</h2>
+
+  <label for="language">Select Language:</label>
+  <select id="language">
+    <option value="ml">Malayalam</option>
+    <option value="en">English</option>
+  </select>
+
+  <!-- Updated Section with Dropdown -->
+  <div class="input-group">
+    <label for="transcriptionHint">Transcription Hint (Crucial for ML):</label>
+
+    <select id="sampleDropdown" onchange="fillSampleHint()">
+      <option value="">-- Select a Sample Sentence --</option>
+      <option value="ml">Malayalam Example</option>
+      <option value="en">English Example</option>
+    </select>
+
+    <textarea id="transcriptionHint" rows="3" placeholder="e.g., എന്റെ പേര് ജെസ്സി എന്നാണ്. (My name is Jessy)"></textarea>
+    <small>*A full sentence helps the transcription model detect the correct script.</small>
+  </div>
+
+  <div class="buttons">
+    <button id="startBtn">🎧 Start Recording</button>
+    <button id="stopBtn" disabled>⏹ Stop Recording</button>
+  </div>
+
+  <div class="recording" id="recordingIndicator">Recording in progress...</div>
+
+  <div id="output">
+    <h3>Detected Text:</h3>
+    <p id="text">Ready. Click 'Start Recording'.</p>
+
+    <h3>Braille Output:</h3>
+    <p id="braille" class="braille"></p>
+  </div>
+</div>
+
+<footer>
+  © <span>2025</span> | Real-Time Voice to Braille Translator
+</footer>
+
+<script>
+let mediaRecorder, audioChunks = [];
+const startBtn = document.getElementById("startBtn");
+const stopBtn = document.getElementById("stopBtn");
+const recordingIndicator = document.getElementById("recordingIndicator");
+const textOutput = document.getElementById("text");
+const brailleOutput = document.getElementById("braille");
+const transcriptionHint = document.getElementById("transcriptionHint");
+
+// Fill sample sentences
+function fillSampleHint() {
+  const dropdown = document.getElementById("sampleDropdown");
+  const transcriptionHint = document.getElementById("transcriptionHint");
+
+  if (dropdown.value === "ml") {
+    transcriptionHint.value = "എന്റെ പേര് അരുന്ധതി ആണ്. ഞാൻ കേരളത്തിൽ നിന്ന് വരുന്നു.";
+  } else if (dropdown.value === "en") {
+    transcriptionHint.value = "My name is Arundhathy. I am from Kerala.";
+  } else {
+    transcriptionHint.value = "";
+  }
+}
+
+const resetOutput = (text='', braille='') => {
+  textOutput.textContent = text;
+  brailleOutput.textContent = braille;
+  textOutput.classList.remove('error');
+};
+
+startBtn.onclick = async () => {
+  try {
+    let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = e => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      stream.getTracks().forEach(track => track.stop());
+      if (!audioChunks.length) {
+        resetOutput('ERROR: No audio recorded. Check your microphone.', '⍰');
+        return;
+      }
+      let blob = new Blob(audioChunks, { type: 'audio/webm' });
+      let formData = new FormData();
+      formData.append('audio', blob, 'input.webm');
+      formData.append('language', document.getElementById("language").value);
+      formData.append('prompt', transcriptionHint.value);
+
+      resetOutput("🕓 Processing audio on server...");
+
+      fetch('/convert', { method: 'POST', body: formData })
+        .then(async res => {
+          const data = await res.json().catch(() => ({ error: 'Invalid server response.' }));
+          if (!res.ok) throw new Error(data.error || `HTTP Error: ${res.status}`);
+          return data;
+        })
+        .then(data => resetOutput(data.text || 'No speech detected.', data.braille || '⍰'))
+        .catch(err => {
+          textOutput.textContent = `ERROR: ${err.message}`;
+          textOutput.classList.add('error');
+          brailleOutput.textContent = '⍰';
+        });
+    };
+
+    mediaRecorder.start();
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    recordingIndicator.style.display = "block";
+    resetOutput("🎙 Recording... Speak now.");
+  } catch (e) {
+    textOutput.textContent = `Microphone access error: ${e.message}`;
+    textOutput.classList.add('error');
+    brailleOutput.textContent = '⍰';
+  }
+};
+
+stopBtn.onclick = () => {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
+  recordingIndicator.style.display = "none";
+};
+</script>
+</body>
+</html>
